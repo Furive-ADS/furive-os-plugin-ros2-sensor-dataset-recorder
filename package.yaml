@@ -1,0 +1,46 @@
+name: ros2-sensor-dataset-recorder
+version: 0.1.0
+type: docker
+description: "LiDAR/카메라 동기화 데이터셋 레코더"
+
+docker:
+  image_name: furive-os-plugin-ros2-sensor-dataset-recorder
+  container_name: furive-os-plugin-ros2-sensor-dataset-recorder
+  network: host
+  ipc: host
+  pid: host
+  privileged: false
+  volumes:
+    - "/etc/localtime:/etc/localtime:ro"
+    - "/etc/timezone:/etc/timezone:ro"
+    - "/dev/shm:/dev/shm"
+    - "${FURIVE_SENSOR_DATASET_RECORDER_CONFIG_DIR:-/data/furive-os/ros2-sensor-dataset-recorder/config}:/data/config:rw"
+    - "${FURIVE_SENSOR_DATASET_RECORDER_DATASET_DIR:-/data/furive-os/ros2-sensor-dataset-recorder/dataset}:/data/dataset:rw"
+    - "${FURIVE_SENSOR_DATASET_RECORDER_CYCLONEDDS_CONFIG:-/data/furive-os/ros2-sensor-dataset-recorder/config/cyclonedds.xml}:/etc/cyclonedds/config.xml:ro"
+  environment:
+    ROS_DOMAIN_ID: "${ROS_DOMAIN_ID:-79}"
+    ROS_LOCALHOST_ONLY: "0"
+    RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
+    CYCLONEDDS_URI: "file:///etc/cyclonedds/config.xml"
+    SENSOR_DATASET_RECORDER_CONFIG: "/data/config/params.yaml"
+
+run:
+  script: run.sh
+
+build:
+  script: build.sh
+  hash_file: .build_hash
+
+health_check:
+  type: docker_inspect
+  container: furive-os-plugin-ros2-sensor-dataset-recorder
+  startup_grace_seconds: 20
+  max_failures: 3
+
+dependencies: []
+
+update:
+  strategy: stop-start
+  rollback_on_failure: true
+
+nodes: [agent]
