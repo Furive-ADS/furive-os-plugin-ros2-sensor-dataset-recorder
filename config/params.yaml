@@ -1,6 +1,6 @@
 /**:
   ros__parameters:
-    dataset_root_dir: /data/dataset
+    dataset_root_dir: /data/rosbags
     lidar_topic: /sensing/lidar/concatenated/pointcloud
     camera_topic: /sensing/camera/camera_top/image_raw
     save_interval: 0.5

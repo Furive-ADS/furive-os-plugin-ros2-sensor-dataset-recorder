@@ -15,7 +15,7 @@ from sensor_msgs.msg import PointCloud2, Image
 import sensor_msgs_py.point_cloud2 as pc2
 from std_msgs.msg import String, UInt8
 
-DATASET_ROOT_DIR = '../niro_dataset'
+DATASET_ROOT_DIR = '/data/rosbags'
 
 
 class SensorDatasetRecorder(Node):
@@ -32,9 +32,7 @@ class SensorDatasetRecorder(Node):
 
         # Get parameters
         dataset_root_dir = self.get_parameter('dataset_root_dir').get_parameter_value().string_value
-        # Build root_dir: {dataset_root_dir}/{YYYY-MM-DD}/sensor_blobs/trainval
-        date_str = datetime.now().strftime('%Y-%m-%d')
-        self.root_dir = os.path.join(dataset_root_dir, date_str, 'sensor_blobs', 'trainval')
+        self.root_dir = dataset_root_dir
         lidar_topic = self.get_parameter('lidar_topic').get_parameter_value().string_value
         camera_topic = self.get_parameter('camera_topic').get_parameter_value().string_value
         save_interval = self.get_parameter('save_interval').get_parameter_value().double_value
@@ -144,7 +142,20 @@ class SensorDatasetRecorder(Node):
         self.create_dirs(msg.data.strip())
 
     def create_dirs(self, rosbag_start_time):
-        base_dir = os.path.join(self.root_dir, rosbag_start_time)
+        session_ref = rosbag_start_time.strip().strip('/')
+        parts = session_ref.split('/')
+
+        if len(parts) >= 3 and parts[1] == 'bags':
+            date_dir = parts[0]
+            session_id = parts[2]
+        else:
+            session_id = os.path.basename(session_ref)
+            if len(session_id) >= 10:
+                date_dir = session_id[:10]
+            else:
+                date_dir = datetime.now().strftime('%Y-%m-%d')
+
+        base_dir = os.path.join(self.root_dir, date_dir, 'sensor_blobs', 'trainval', session_id)
 
         self.lidar_dir = os.path.join(base_dir, 'MergedPointCloud')
         self.camera_dir = os.path.join(base_dir, 'CAM_F0')
@@ -152,9 +163,9 @@ class SensorDatasetRecorder(Node):
         os.makedirs(self.lidar_dir, exist_ok=True)
         os.makedirs(self.camera_dir, exist_ok=True)
 
-        self.prev_id = rosbag_start_time
+        self.prev_id = session_ref
 
-        self.get_logger().info(f'Using rosbag start time as rosbag_start_time: {rosbag_start_time}')
+        self.get_logger().info(f'Using rosbag start time as rosbag_start_time: {session_ref}')
         self.get_logger().info(f'Lidar save path: {self.lidar_dir}')
         self.get_logger().info(f'Camera save path: {self.camera_dir}')
 

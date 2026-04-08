@@ -15,13 +15,13 @@ docker:
     - "/etc/timezone:/etc/timezone:ro"
     - "/dev/shm:/dev/shm"
     - "${FURIVE_SENSOR_DATASET_RECORDER_CONFIG_DIR:-/data/furive-os/ros2-sensor-dataset-recorder/config}:/data/config:rw"
-    - "${FURIVE_SENSOR_DATASET_RECORDER_DATASET_DIR:-/data/furive-os/ros2-sensor-dataset-recorder/dataset}:/data/dataset:rw"
-    - "${FURIVE_SENSOR_DATASET_RECORDER_CYCLONEDDS_CONFIG:-/data/furive-os/ros2-sensor-dataset-recorder/config/cyclonedds.xml}:/etc/cyclonedds/config.xml:ro"
+    - "${FURIVE_SENSOR_DATASET_RECORDER_ROSBAGS_DIR:-/data/furive-os/data-logging-system/rosbags}:/data/rosbags:rw"
+    - "${FURIVE_SENSOR_DATASET_RECORDER_CYCLONEDDS_CONFIG:-/data/furive-os/ros2-sensor-dataset-recorder/config/cyclonedds.xml}:/etc/cyclonedds/runtime_config.xml:ro"
   environment:
     ROS_DOMAIN_ID: "${ROS_DOMAIN_ID:-79}"
     ROS_LOCALHOST_ONLY: "0"
     RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
-    CYCLONEDDS_URI: "file:///etc/cyclonedds/config.xml"
+    CYCLONEDDS_URI: "file:///etc/cyclonedds/runtime_config.xml"
     SENSOR_DATASET_RECORDER_CONFIG: "/data/config/params.yaml"
 
 run:
