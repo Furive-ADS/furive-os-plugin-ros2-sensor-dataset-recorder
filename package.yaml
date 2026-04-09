@@ -15,7 +15,7 @@ docker:
     - "/etc/timezone:/etc/timezone:ro"
     - "/dev/shm:/dev/shm"
     - "${FURIVE_SENSOR_DATASET_RECORDER_CONFIG_DIR:-/data/furive-os/ros2-sensor-dataset-recorder/config}:/data/config:rw"
-    - "${FURIVE_SENSOR_DATASET_RECORDER_ROSBAGS_DIR:-/data/furive-os/data-logging-system/rosbags}:/data/rosbags:rw"
+    - "${FURIVE_SENSOR_DATASET_RECORDER_DATASETS_DIR:-/data/furive-os/data-logging-system/datasets}:/data/datasets:rw"
     - "${FURIVE_SENSOR_DATASET_RECORDER_CYCLONEDDS_CONFIG:-/data/furive-os/ros2-sensor-dataset-recorder/config/cyclonedds.xml}:/etc/cyclonedds/runtime_config.xml:ro"
   environment:
     ROS_DOMAIN_ID: "${ROS_DOMAIN_ID:-79}"

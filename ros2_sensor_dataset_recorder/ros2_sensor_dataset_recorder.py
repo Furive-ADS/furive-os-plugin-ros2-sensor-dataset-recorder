@@ -15,7 +15,7 @@ from sensor_msgs.msg import PointCloud2, Image
 import sensor_msgs_py.point_cloud2 as pc2
 from std_msgs.msg import String, UInt8
 
-DATASET_ROOT_DIR = '/data/rosbags'
+DATASET_ROOT_DIR = '/data/datasets'
 
 
 class SensorDatasetRecorder(Node):
@@ -24,7 +24,7 @@ class SensorDatasetRecorder(Node):
 
         # Declare parameters
         self.declare_parameter('dataset_root_dir', DATASET_ROOT_DIR)
-        self.declare_parameter('lidar_topic', '/sensing/lidar/concatenated/pointcloud')
+        self.declare_parameter('lidar_topic', '/sensing/lidar/top/pointcloud_raw_ex')
         self.declare_parameter('camera_topic', '/sensing/camera/camera_top/image_raw')
         self.declare_parameter('save_interval', 0.5)
         self.declare_parameter('timeout_threshold', 1.5)
