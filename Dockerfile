@@ -1,10 +1,11 @@
-FROM osrf/ros:humble-desktop
+ARG BASE_IMAGE=furive-os-base
+FROM ${BASE_IMAGE}
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ROS_DISTRO=humble
 ENV TZ=Asia/Seoul
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get -o Acquire::Retries=3 update && apt-get install -y --no-install-recommends \
     python3-colcon-common-extensions \
     python3-opencv \
     python3-numpy \
@@ -19,7 +20,11 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /ws
 
-COPY . /ws/src/ros2_sensor_dataset_recorder
+RUN mkdir -p /ws/src/ros2_sensor_dataset_recorder
+COPY package.xml setup.py setup.cfg /ws/src/ros2_sensor_dataset_recorder/
+COPY resource /ws/src/ros2_sensor_dataset_recorder/resource
+COPY launch /ws/src/ros2_sensor_dataset_recorder/launch
+COPY ros2_sensor_dataset_recorder /ws/src/ros2_sensor_dataset_recorder/ros2_sensor_dataset_recorder
 
 RUN /bin/bash -lc "source /opt/ros/${ROS_DISTRO}/setup.bash && colcon build --symlink-install --packages-select ros2_sensor_dataset_recorder"
 

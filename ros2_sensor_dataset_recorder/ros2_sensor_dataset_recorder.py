@@ -27,6 +27,7 @@ class SensorDatasetRecorder(Node):
         self.declare_parameter('lidar_topic', '/sensing/lidar/top/pointcloud_raw_ex')
         self.declare_parameter('camera_topic', '/sensing/camera/camera_top/image_raw')
         self.declare_parameter('save_interval', 0.5)
+        self.declare_parameter('sync_slop', 0.1)
         self.declare_parameter('timeout_threshold', 1.5)
         self.declare_parameter('id_heartbeat_timeout', 1.5)
 
@@ -36,6 +37,7 @@ class SensorDatasetRecorder(Node):
         lidar_topic = self.get_parameter('lidar_topic').get_parameter_value().string_value
         camera_topic = self.get_parameter('camera_topic').get_parameter_value().string_value
         save_interval = self.get_parameter('save_interval').get_parameter_value().double_value
+        self.sync_slop = self.get_parameter('sync_slop').get_parameter_value().double_value
         self.timeout_threshold = self.get_parameter('timeout_threshold').get_parameter_value().double_value
         self.id_heartbeat_timeout = self.get_parameter('id_heartbeat_timeout').get_parameter_value().double_value
 
@@ -73,11 +75,10 @@ class SensorDatasetRecorder(Node):
             camera_topic
         )
 
-        # Approximate Time Synchronizer (sync within 100ms)
         self.sync = ApproximateTimeSynchronizer(
             [self.lidar_sub, self.camera_sub],
             queue_size=10,
-            slop=0.1
+            slop=self.sync_slop
         )
         self.sync.registerCallback(self.sync_callback)
 
@@ -102,6 +103,8 @@ class SensorDatasetRecorder(Node):
         # Individual topic tracking
         self.last_lidar_individual_time = None
         self.last_camera_individual_time = None
+        self.last_lidar_stamp = None
+        self.last_camera_stamp = None
 
         # rosbag recorder settings
         self.last_id_heartbeat_time = None
@@ -110,12 +113,15 @@ class SensorDatasetRecorder(Node):
         self.get_logger().info(f'Root dir: {self.root_dir}')
         self.get_logger().info(f'LiDAR topic: {lidar_topic}')
         self.get_logger().info(f'Camera topic: {camera_topic}')
+        self.get_logger().info(f'Time sync slop: {self.sync_slop * 1000:.0f}ms')
 
     def lidar_tracking_callback(self, msg):
         self.last_lidar_individual_time = self.get_clock().now()
+        self.last_lidar_stamp = msg.header.stamp
 
     def camera_tracking_callback(self, msg):
         self.last_camera_individual_time = self.get_clock().now()
+        self.last_camera_stamp = msg.header.stamp
 
     def sync_callback(self, lidar_msg, camera_msg):
         """Store synchronized lidar and camera messages"""
@@ -202,7 +208,17 @@ class SensorDatasetRecorder(Node):
                 self.get_logger().warn('check 2, Camera topic not received')
                 self.publish_diagnostic(32)
             else:
-                self.get_logger().warn('check 2, Both topics received but time sync failed (slop > 100ms)')
+                stamp_diff_ms = self.get_last_stamp_diff_ms()
+                if stamp_diff_ms is None:
+                    self.get_logger().warn(
+                        f'check 2, Both topics received but time sync failed '
+                        f'(slop > {self.sync_slop * 1000:.0f}ms)'
+                    )
+                else:
+                    self.get_logger().warn(
+                        f'check 2, Both topics received but time sync failed '
+                        f'(latest stamp diff {stamp_diff_ms:.1f}ms > slop {self.sync_slop * 1000:.0f}ms)'
+                    )
                 self.publish_diagnostic(34)
             return
 
@@ -309,6 +325,14 @@ class SensorDatasetRecorder(Node):
         diag_msg = UInt8()
         diag_msg.data = num
         self.diag_pub.publish(diag_msg)
+
+    def get_last_stamp_diff_ms(self):
+        if self.last_lidar_stamp is None or self.last_camera_stamp is None:
+            return None
+
+        lidar_time = self.last_lidar_stamp.sec + self.last_lidar_stamp.nanosec * 1e-9
+        camera_time = self.last_camera_stamp.sec + self.last_camera_stamp.nanosec * 1e-9
+        return abs(lidar_time - camera_time) * 1000.0
 
 def main(args=None):
     rclpy.init(args=args)

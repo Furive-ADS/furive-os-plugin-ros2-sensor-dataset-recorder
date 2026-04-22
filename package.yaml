@@ -30,6 +30,7 @@ run:
 build:
   script: build.sh
   hash_file: .build_hash
+  skip_if_image_exists: true
 
 health_check:
   type: docker_inspect
