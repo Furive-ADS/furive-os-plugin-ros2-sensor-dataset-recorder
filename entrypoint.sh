@@ -30,6 +30,10 @@ if [ -n "${SENSOR_DATASET_RECORDER_SAVE_INTERVAL:-}" ]; then
   ARGS+=(-p "save_interval:=${SENSOR_DATASET_RECORDER_SAVE_INTERVAL}")
 fi
 
+if [ -n "${SENSOR_DATASET_RECORDER_SYNC_SLOP:-}" ]; then
+  ARGS+=(-p "sync_slop:=${SENSOR_DATASET_RECORDER_SYNC_SLOP}")
+fi
+
 if [ -n "${SENSOR_DATASET_RECORDER_TIMEOUT_THRESHOLD:-}" ]; then
   ARGS+=(-p "timeout_threshold:=${SENSOR_DATASET_RECORDER_TIMEOUT_THRESHOLD}")
 fi

@@ -1,0 +1,8 @@
+.git
+.build_hash
+build/
+install/
+log/
+dataset/
+__pycache__/
+*.pyc

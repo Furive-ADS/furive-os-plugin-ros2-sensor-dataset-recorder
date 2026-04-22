@@ -4,6 +4,7 @@
   <arg name="lidar_topic" default="/sensing/lidar/concatenated/pointcloud"/>
   <arg name="camera_topic" default="/sensing/camera/camera_top/image_raw"/>
   <arg name="save_interval" default="0.5"/>
+  <arg name="sync_slop" default="0.1"/>
   <arg name="timeout_threshold" default="1.5"/>
   <arg name="id_heartbeat_timeout" default="1.5"/>
 
@@ -12,6 +13,7 @@
     <param name="lidar_topic" value="$(var lidar_topic)"/>
     <param name="camera_topic" value="$(var camera_topic)"/>
     <param name="save_interval" value="$(var save_interval)"/>
+    <param name="sync_slop" value="$(var sync_slop)"/>
     <param name="timeout_threshold" value="$(var timeout_threshold)"/>
     <param name="id_heartbeat_timeout" value="$(var id_heartbeat_timeout)"/>
   </node>
