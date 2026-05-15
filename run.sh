@@ -3,15 +3,20 @@ set -e
 
 IMAGE_NAME="${FURIVE_DOCKER_IMAGE:-furive-os-plugin-ros2-sensor-dataset-recorder:latest}"
 CONTAINER_NAME="${FURIVE_DOCKER_CONTAINER_NAME:-furive-os-plugin-ros2-sensor-dataset-recorder}"
-CONFIG_DIR="${FURIVE_SENSOR_DATASET_RECORDER_CONFIG_DIR:-/data/furive-os/ros2-sensor-dataset-recorder/config}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_DIR="${FURIVE_SENSOR_DATASET_RECORDER_CONFIG_DIR:-$SCRIPT_DIR/config}"
 DATASETS_DIR="${FURIVE_SENSOR_DATASET_RECORDER_DATASETS_DIR:-/data/furive-os/data-logging-system/datasets}"
 CYCLONEDDS_CONFIG_PATH="${FURIVE_SENSOR_DATASET_RECORDER_CYCLONEDDS_CONFIG:-$CONFIG_DIR/cyclonedds.xml}"
 DOCKER_NAME_FLAG=(--rm)
 TTY_FLAG=(-it)
+FURIVE_NODE_TYPE="${FURIVE_NODE_TYPE:-agent}"
 
 if [ "${FURIVE_PM_MANAGED:-0}" = "1" ]; then
   DOCKER_NAME_FLAG=(--name "$CONTAINER_NAME" --restart unless-stopped)
   TTY_FLAG=(-d)
+  if docker ps -a --format '{{.Names}}' | grep -qx "$CONTAINER_NAME"; then
+    docker rm -f "$CONTAINER_NAME" >/dev/null
+  fi
 elif [ ! -t 0 ] || [ ! -t 1 ]; then
   TTY_FLAG=(-d)
 fi
