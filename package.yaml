@@ -18,7 +18,7 @@ docker:
     - "${FURIVE_SENSOR_DATASET_RECORDER_DATASETS_DIR:-/data/furive-os/data-logging-system/datasets}:/data/datasets:rw"
     - "${FURIVE_SENSOR_DATASET_RECORDER_CYCLONEDDS_CONFIG:-/data/furive-os/cyclonedds_config.xml}:/etc/cyclonedds/config.xml:ro"
   environment:
-    ROS_DOMAIN_ID: "${ROS_DOMAIN_ID:-79}"
+    ROS_DOMAIN_ID: "${ROS_DOMAIN_ID:-17}"
     ROS_LOCALHOST_ONLY: "0"
     RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
     CYCLONEDDS_URI: "file:///etc/cyclonedds/config.xml"

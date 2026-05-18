@@ -46,7 +46,7 @@ docker run "${TTY_FLAG[@]}" "${DOCKER_NAME_FLAG[@]}" \
   -v "$DATASETS_DIR:/data/datasets:rw" \
   -v "$CYCLONEDDS_CONFIG_PATH:/etc/cyclonedds/config.xml:ro" \
   -e TZ="${TZ:-Asia/Seoul}" \
-  -e ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-79}" \
+  -e ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-17}" \
   -e ROS_LOCALHOST_ONLY="${ROS_LOCALHOST_ONLY:-0}" \
   -e RMW_IMPLEMENTATION="${RMW_IMPLEMENTATION:-rmw_cyclonedds_cpp}" \
   -e CYCLONEDDS_URI="file:///etc/cyclonedds/config.xml" \
