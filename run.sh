@@ -4,6 +4,16 @@ set -e
 IMAGE_NAME="${FURIVE_DOCKER_IMAGE:-furive-os-plugin-ros2-sensor-dataset-recorder:latest}"
 CONTAINER_NAME="${FURIVE_DOCKER_CONTAINER_NAME:-furive-os-plugin-ros2-sensor-dataset-recorder}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FURIVE_NODE_TYPE="${FURIVE_NODE_TYPE:-agent}"
+ROS_DOMAIN_HELPER="$SCRIPT_DIR/../../../scripts/ros-domain-env.sh"
+if [ -f "$ROS_DOMAIN_HELPER" ]; then
+  source "$ROS_DOMAIN_HELPER"
+  furive_apply_ros_domain_args "$(furive_resolve_ros_domain_id "$SCRIPT_DIR" 17)" "$@"
+  set -- "${FURIVE_REMAINING_ARGS[@]}"
+else
+  export ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-17}"
+fi
+echo "[ros2-sensor-dataset-recorder] ROS_DOMAIN_ID=$ROS_DOMAIN_ID"
 CONFIG_DIR="${FURIVE_SENSOR_DATASET_RECORDER_CONFIG_DIR:-$SCRIPT_DIR/config}"
 DATASETS_DIR="${FURIVE_SENSOR_DATASET_RECORDER_DATASETS_DIR:-/data/furive-os/data-logging-system/datasets}"
 CYCLONEDDS_CONFIG_PATH="${FURIVE_SENSOR_DATASET_RECORDER_CYCLONEDDS_CONFIG:-}"
@@ -16,7 +26,6 @@ if [ -z "$CYCLONEDDS_CONFIG_PATH" ]; then
 fi
 DOCKER_NAME_FLAG=(--rm)
 TTY_FLAG=(-it)
-FURIVE_NODE_TYPE="${FURIVE_NODE_TYPE:-agent}"
 
 if [ "${FURIVE_PM_MANAGED:-0}" = "1" ]; then
   DOCKER_NAME_FLAG=(--name "$CONTAINER_NAME" --restart unless-stopped)
@@ -46,7 +55,7 @@ docker run "${TTY_FLAG[@]}" "${DOCKER_NAME_FLAG[@]}" \
   -v "$DATASETS_DIR:/data/datasets:rw" \
   -v "$CYCLONEDDS_CONFIG_PATH:/etc/cyclonedds/config.xml:ro" \
   -e TZ="${TZ:-Asia/Seoul}" \
-  -e ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-17}" \
+  -e ROS_DOMAIN_ID="$ROS_DOMAIN_ID" \
   -e ROS_LOCALHOST_ONLY="${ROS_LOCALHOST_ONLY:-0}" \
   -e RMW_IMPLEMENTATION="${RMW_IMPLEMENTATION:-rmw_cyclonedds_cpp}" \
   -e CYCLONEDDS_URI="file:///etc/cyclonedds/config.xml" \
